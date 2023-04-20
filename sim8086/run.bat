@@ -6,8 +6,6 @@ if [%1] == [] goto :USAGE
 
 set LISTINGS=..\computer_enhance\perfaware\part1
 
-set TARGET=%1
-
 for /f %%i in ('where /R %LISTINGS% listing_%1_*.') do set TARGET=%%i
 
 if not exist %TARGET% (
@@ -21,8 +19,10 @@ if [%2] == [] (
 	goto :EXIT
 )
 
+: why on earth does SET get deferred until *after* an IF block has finished executing???
+set TEST=.\tests\listing-%1-test
+
 if %2 == -test (
-	set TEST=.\tests\listing-%1-test
 	echo Compiling... 1>&2
 	: zig build run -- %TARGET% > %TEST%.asm
 	zig build
@@ -45,6 +45,10 @@ echo.	-test	 Runs the output through NASM and compares with the listing binary
 
 
 :EXIT
+: reset variables, since for some reason they persist after the script has exited
+(set LISTINGS=)
+(set TARGET=)
+(set TEST=)
 popd
 exit /B
 
